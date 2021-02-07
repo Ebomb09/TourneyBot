@@ -71,4 +71,26 @@ class Profile:
         1
         """
         self.__losses += 1    
+        
+    def __eq__(self, other: 'Profile')->bool:
+        """Determines if two profiles are the same profile
+        >>> h = Profile('Hayden', 51)
+        >>> d = Profile('Daniel', 62)
+        >>> h1 = Profile('Hayden', 56)
+        >>> l = Profile('Hayden', 51)
+        
+        >>> d == h
+        False
+        >>> h == l
+        True
+        >>> h == h1
+        False
+        >>> h.add_loss()
+        >>> h == l
+        True
+        >>> h.add_win()
+        >>> h == l
+        True
+        """
+        return (self.__id == other.__id)
    
