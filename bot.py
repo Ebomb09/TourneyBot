@@ -5,7 +5,7 @@ def main():
     intents = discord.Intents().all()
 
     client = LadderBot(intents)
-    client.run("ODA3NzkzNDM0MTAxMjg0ODY1.YB9KQg.kp5aJC9iaHET9Tf7CvilUArZCpc")
+    client.run("KEY")
 
 
 class ReactionRequest:
