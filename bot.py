@@ -5,7 +5,7 @@ def main():
     intents = discord.Intents().all()
 
     client = LadderBot(intents)
-    client.run("KEY")
+    client.run("ODA3NzkzNDM0MTAxMjg0ODY1.YB9KQg.6-wJNjrMGaebrnkNvNgb8gM_CZo")
 
 
 class ReactionRequest:
@@ -42,11 +42,17 @@ class LadderBot(discord.Client):
         """Load command variables
         """
 
-        #self.PickLB = Leaderboard("pick.lb");
-        #self.RandomLB = Leaderboard("random.lb");
+        self.PickLeaderboard = Leaderboard("pick.lb");
+        self.RandomLeaderboard = Leaderboard("random.lb");
         self.ReactionRequestList = []
         super().__init__(intents = intents)
 
+
+    """
+    |
+    |   Event handling interface
+    |
+    """
 
     async def on_ready(self):
         """On bot startup
@@ -117,6 +123,12 @@ class LadderBot(discord.Client):
             coms = message.content.upper()[1:].split(' ')
             await self.handle_command(coms[0], len(coms) - 1, coms[1 : len(coms)], message)
 
+
+    """
+    |
+    |   Helper methods
+    |
+    """
     
     async def get_user(self, string_name):
         """Simplified getter method to retrieve discord.User
@@ -141,14 +153,21 @@ class LadderBot(discord.Client):
         #Debug command line options
         print(command, ":", argc, ":", argv)
 
-        if(command == "CHALLENGE"):
-            await self.command_challenge(source.channel, source.author, await self.get_user(argv[0]))
+        if(command == "PICKCHALLENGE"):
+            await self.command_challenge(source.channel, source.author, await self.get_user(argv[0]), self.PickLeaderboard)
+
+        if(command == "RANDOMCHALLENGE"):
+            await self.command_challenge(source.channel, source.author, await self.get_user(argv[0]), self.RandomLeaderboard)
 
         if(command == "HELP"):
             await source.channel.send("No help from me you dumbshit")
 
-
-    async def command_challenge(self, channel, duelist1, duelist2):
+    """
+    |
+    |   Challenge commands interfacing
+    |
+    """
+    async def command_challenge(self, channel, duelist1, duelist2, leaderboard):
         """Command for duel requests
         ___
 
@@ -161,26 +180,50 @@ class LadderBot(discord.Client):
         if(duelist1 == duelist2 or duelist1 == 0 or duelist2 == 0):
             return
 
+        profiles = [leaderboard.get_profile(duelist1.id), leaderboard.get_profile(duelist2.id)]
+
         #Send duel messages
-        await channel.send(duelist1.mention + " has challenged " + duelist2.mention + " to a duel!")
+        await channel.send("⚔ " + duelist1.mention + " has challenged " + duelist2.mention + " to a duel!")
         msg = await channel.send(duelist1.mention + " and " + duelist2.mention + " must both react to accept the duel.")
 
         #Create emoji request
-        req = ReactionRequest(msg, [duelist1, duelist2], [2, 1], [self.accept_challenge, self. decline_challenge])
+        req = ReactionRequest(msg, [duelist1, duelist2], [2, 1], [self.accept_challenge, self.decline_challenge])
         await req.use_reactions(["✔", "❌"])
 
         #Add to list and wait for response
         self.ReactionRequestList.append( req )
 
     async def accept_challenge(self, message, users, current_votes, need_votes):
-        """Duel will initiate and request another reaction response for when the duel is over
+        """Callback function, duel will initiate and request another reaction response for when the duel is over
         """
-        await message.channel.send("The challenge was accepted")
+        await message.channel.send("The challenge was accepted!")
+        msg = await message.channel.send("🏳" + users[0].mention + " and 🏴" + users[1].mention + " must agree upon the winner by reacting with the following")
+
+        req = ReactionRequest(msg, users, [2, 2], [self.winner_challenge, self.winner_challenge])
+
+        self.ReactionRequestList.append( req )
+
 
     async def decline_challenge(self, message, users, current_votes, need_votes):
-        """Duel will initiate and request another reaction response for when the duel is over
+        """Callback function, duel will initiate and request another reaction response for when the duel is over
         """       
-        await message.channel.send("The challenge was cancelled")
+        await message.channel.send("The challenge was cancelled.")
+
+
+    async def winner_challenge(self, message, users, current_votes, need_votes):
+        """Callback function, called when the winner of the duel is agreed upon
+        """
+        winner = None
+
+        if(current_votes[0] > current_votes[1]):
+            winner = users[0]
+
+        if(current_votes[1] > current_votes[0]):
+            winner = users[1]
+
+        message.channel.send("The winner of the duel was " + winner.mention + "!")
+
+
 
 
 if (__name__ == "__main__"):
