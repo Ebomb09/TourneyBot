@@ -75,3 +75,7 @@ class Leaderboard:
         """
 
         self.__rankings.append(Profile(Name, ID))
+
+    def within_range(self, challenger, challenged):
+        """Check if two profiles are able to challenge each other
+        """

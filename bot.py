@@ -5,14 +5,14 @@ def main():
     intents = discord.Intents().all()
 
     client = LadderBot(intents)
-    client.run("ODA3NzkzNDM0MTAxMjg0ODY1.YB9KQg.6-wJNjrMGaebrnkNvNgb8gM_CZo")
+    client.run("KEY")
 
 
 class ReactionRequest:
     """Requests to be input by users
     """
 
-    def __init__(self, _message, _users, _need_votes, _func):
+    def __init__(self, _message, _users, _need_votes, _func, _args = []):
         self.message = _message
         self.users = _users
         self.need_votes = _need_votes
@@ -180,7 +180,19 @@ class LadderBot(discord.Client):
         if(duelist1 == duelist2 or duelist1 == 0 or duelist2 == 0):
             return
 
+        #Check for profile usage
         profiles = [leaderboard.get_profile(duelist1.id), leaderboard.get_profile(duelist2.id)]
+
+        if(profiles[0] == None):
+            leaderboard.create_profile(duelist1.name, duelist1.id)
+
+        if(profiles[1] == None):
+            leaderboard.create_profile(duelist2.name, duelist2.id)
+
+        if(!leaderboard.within_range(profiles[0], profiles[1])):
+            await channel.send("Challenging users are out of range on the ladder board")
+            return
+
 
         #Send duel messages
         await channel.send("⚔ " + duelist1.mention + " has challenged " + duelist2.mention + " to a duel!")
