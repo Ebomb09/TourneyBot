@@ -59,7 +59,7 @@ class Leaderboard:
         self.__rankings[y-1] = per1
 
 
-    def get_profile(self, container_id):
+    def get_profile(self, container_id)->int:
         """Retrieve if the holding class contains an user based on the integer id
         """
 
@@ -68,14 +68,23 @@ class Leaderboard:
             if container_id == x.i_d:
                 return x
 
-        return None        
+        return None
+    
 
-    def create_profile(self, Name, ID):
+    def create_profile(self, Name, ID)->None:
         """Create a profile for the user
         """
 
         self.__rankings.append(Profile(Name, ID))
 
-    def within_range(self, challenger, challenged):
-        """Check if two profiles are able to challenge each other
+    
+    def within_range(self, challenger, challenged)->bool:
+        """Check if two profiles are able to challenge each other and 
+        returns true if they are able, and otherwise returns false
         """
+        
+        if(self.get_rank(challenger) + 2 >= self.get_rank(challenged)):
+            return True
+        else:
+            return False
+            
